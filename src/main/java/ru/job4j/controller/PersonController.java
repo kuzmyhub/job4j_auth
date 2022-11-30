@@ -1,4 +1,4 @@
-package ru.job4j.controler;
+package ru.job4j.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
