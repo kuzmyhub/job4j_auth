@@ -1,5 +1,6 @@
 package ru.job4j.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,10 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.domain.Person;
 import ru.job4j.service.PersonService;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -16,8 +21,12 @@ import java.util.List;
 @AllArgsConstructor
 public class PersonController {
 
+    static final int MIN_LENGTH = 3;
+    static final int MIN_ID = 1;
+
     private final PersonService personService;
     private BCryptPasswordEncoder encoder;
+    private final ObjectMapper objectMapper;
 
     @GetMapping("/all")
     public List<Person> findAll() {
@@ -26,6 +35,18 @@ public class PersonController {
 
     @PostMapping("/sign-up")
     public void signUp(@RequestBody Person person) {
+        if (person.getPassword().length() < MIN_LENGTH
+                || person.getLogin().length() < MIN_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Login and password must contain more than 2 characters"
+            );
+        }
+        if (person.getPassword() == null
+                || person.getLogin() == null) {
+            throw new NullPointerException(
+                    "Login or/and password is not specified"
+            );
+        }
         person.setPassword(encoder.encode(person.getPassword()));
         personService.save(person);
     }
@@ -33,14 +54,23 @@ public class PersonController {
     @GetMapping("/{id}")
     public ResponseEntity<Person> findById(@PathVariable int id) {
         var person = this.personService.findById(id);
-        return new ResponseEntity<Person>(
-                person.orElse(new Person()),
-                person.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
-        );
+        if (person.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    String.format("Not found person id = %s", id)
+            );
+        }
+        return new ResponseEntity<>(person.get(), HttpStatus.OK);
     }
 
     @PostMapping("/")
     public ResponseEntity<Person> create(@RequestBody Person person) {
+        if (person.getPassword() == null
+                || person.getLogin() == null) {
+            throw new NullPointerException(
+                    "Login or/and password is not specified"
+            );
+        }
         return new ResponseEntity<>(
                 this.personService.save(person), HttpStatus.CREATED
         );
@@ -48,6 +78,12 @@ public class PersonController {
 
     @PutMapping("/")
     public ResponseEntity<Void> update(@RequestBody Person person) {
+        if (person.getPassword() == null
+                || person.getLogin() == null) {
+            throw new NullPointerException(
+                    "Login or/and password is not specified"
+            );
+        }
         if (this.personService.findById(person.getId()).isEmpty()) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
@@ -70,5 +106,15 @@ public class PersonController {
         person.setId(id);
         this.personService.delete(person);
         return ResponseEntity.ok().build();
+    }
+
+    @ExceptionHandler(value = { IllegalArgumentException.class })
+    public void exceptionHandler(Exception e, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setStatus(HttpStatus.BAD_REQUEST.value());
+        response.setContentType("application/json");
+        response.getWriter().write(objectMapper.writeValueAsString(new HashMap<>() { {
+            put("message", e.getMessage());
+            put("type", e.getClass());
+        }}));
     }
 }
