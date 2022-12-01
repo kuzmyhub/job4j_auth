@@ -1,0 +1,4 @@
+read_all= curl -i http://localhost:8080/person/1
+read_by_id= curl -i http://localhost:8080/person/1
+save= curl -H "Content-Type:application/json" -X POST -d "{\"login\":\"job4j@gmail.com\",\"password\":\"123\"}" http://localhost:8080/person/
+update= curl -i -H "Content-Type:application/json" -X PUT -d "{\"id\":\"5\",\"login\":\"suport@job4j.com\",\"password\":\"123\"}" http://localhost:8080/person/

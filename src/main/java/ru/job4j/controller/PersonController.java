@@ -4,8 +4,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.domain.Person;
-import ru.job4j.repository.PersonRepository;
+import ru.job4j.service.PersonService;
 
 import java.util.List;
 
@@ -14,16 +15,16 @@ import java.util.List;
 @AllArgsConstructor
 public class PersonController {
 
-    private final PersonRepository persons;
+    private final PersonService personService;
 
     @GetMapping("/")
     public List<Person> findAll() {
-        return this.persons.findAll();
+        return this.personService.findAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Person> findById(@PathVariable int id) {
-        var person = this.persons.findById(id);
+        var person = this.personService.findById(id);
         return new ResponseEntity<Person>(
                 person.orElse(new Person()),
                 person.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
@@ -33,21 +34,33 @@ public class PersonController {
     @PostMapping("/")
     public ResponseEntity<Person> create(@RequestBody Person person) {
         return new ResponseEntity<>(
-                this.persons.save(person), HttpStatus.CREATED
+                this.personService.save(person), HttpStatus.CREATED
         );
     }
 
     @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestParam Person person) {
-        this.persons.save(person);
+    public ResponseEntity<Void> update(@RequestBody Person person) {
+        if (this.personService.findById(person.getId()).isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    String.format("Not found person %s for update", person)
+            );
+        }
+        this.personService.save(person);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
+        if (this.personService.findById(id).isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    String.format("Not found person id = %s", id)
+            );
+        }
         Person person = new Person();
         person.setId(id);
-        this.persons.delete(person);
+        this.personService.delete(person);
         return ResponseEntity.ok().build();
     }
 }
