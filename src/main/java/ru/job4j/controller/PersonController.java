@@ -22,7 +22,6 @@ import java.util.List;
 public class PersonController {
 
     static final int MIN_LENGTH = 3;
-    static final int MIN_ID = 1;
 
     private final PersonService personService;
     private BCryptPasswordEncoder encoder;
