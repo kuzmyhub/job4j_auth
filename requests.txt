@@ -1,4 +1,10 @@
-read_all= curl -i http://localhost:8080/person/1
+read_all= curl -i http://localhost:8080/person/all
 read_by_id= curl -i http://localhost:8080/person/1
 save= curl -H "Content-Type:application/json" -X POST -d "{\"login\":\"job4j@gmail.com\",\"password\":\"123\"}" http://localhost:8080/person/
 update= curl -i -H "Content-Type:application/json" -X PUT -d "{\"id\":\"5\",\"login\":\"suport@job4j.com\",\"password\":\"123\"}" http://localhost:8080/person/
+delete= curl -i -X DELETE http://localhost:8080/person/5
+
+sign-up= curl -H "Content-Type:application/json" -X POST -d "{\"login\":\"admin\",\"password\":\"password\"}" http://localhost:8080/person/sign-up
+login= curl -i -H "Content-Type:application/json" -X POST -d "{\"login\":\"admin\",\"password\":\"password\"}" http://localhost:8080/login
+all_users_with_token= curl -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTY3MDc1OTMxNn0.muw-kkxJSyP8zMt9oEUI6ZVDR2qddrjUBT2YqE5hsu2DnPIQU_m0S3hdS3VgCac7FrQg4CTeiD33DfHU0sD5LQ" http://localhost:8080/person/all
+
