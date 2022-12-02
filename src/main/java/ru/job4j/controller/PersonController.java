@@ -109,6 +109,26 @@ public class PersonController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/{id}")
+    public Map<String, String> patch(
+            @PathVariable int id,
+            @RequestBody Map<String, String> body) {
+        Person person = personService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                String.format("Not found person id =%s", body.get("id"))
+                        )
+                );
+        if (body.containsKey("login")) {
+            person.setLogin(body.get("login"));
+        }
+        if (body.containsKey("password")) {
+            person.setPassword(body.get("password"));
+        }
+        personService.save(person);
+        return body;
+    }
+
     @ExceptionHandler(value = { IllegalArgumentException.class })
     public void exceptionHandler(Exception e, HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setStatus(HttpStatus.BAD_REQUEST.value());
