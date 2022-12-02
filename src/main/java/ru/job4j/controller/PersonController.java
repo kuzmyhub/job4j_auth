@@ -77,30 +77,26 @@ public class PersonController {
 
     @PutMapping("/")
     public ResponseEntity<Void> update(@RequestBody Person person) {
-        if (person.getPassword() == null
-                || person.getLogin() == null) {
-            throw new NullPointerException(
-                    "Login or/and password is not specified"
-            );
-        }
-        if (this.personService.findById(person.getId()).isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    String.format("Not found person %s for update", person)
-            );
-        }
+        this.personService
+                .findById(person.getId()).orElseThrow(
+                        () -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                String.format("Not found person %s for update", person)
+                        )
+                );
         this.personService.save(person);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
-        if (this.personService.findById(id).isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    String.format("Not found person id = %s", id)
-            );
-        }
+        this.personService
+                .findById(id).orElseThrow(
+                        () -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                String.format("Not found person id =%s", id)
+                        )
+                );
         Person person = new Person();
         person.setId(id);
         this.personService.delete(person);
