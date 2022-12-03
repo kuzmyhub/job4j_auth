@@ -44,18 +44,6 @@ public class PersonController {
     @PostMapping("/sign-up")
     @Validated(Operation.OnCreate.class)
     public void signUp(@Valid @RequestBody Person person) {
-        if (person.getPassword().length() < MIN_LENGTH
-                || person.getLogin().length() < MIN_LENGTH) {
-            throw new IllegalArgumentException(
-                    "Login and password must contain more than 2 characters"
-            );
-        }
-        if (person.getPassword() == null
-                || person.getLogin() == null) {
-            throw new NullPointerException(
-                    "Login or/and password is not specified"
-            );
-        }
         person.setPassword(encoder.encode(person.getPassword()));
         personService.save(person);
     }
@@ -87,6 +75,7 @@ public class PersonController {
     }
 
     @PutMapping("/")
+    @Validated(Operation.OnUpdate.class)
     public ResponseEntity<Void> update(@Valid @RequestBody Person person) {
         this.personService
                 .findById(person.getId()).orElseThrow(

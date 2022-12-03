@@ -12,14 +12,20 @@ import javax.validation.constraints.*;
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Min(1)
+    @Min(value = 1, groups = { Operation.OnUpdate.class })
     private int id;
+
     @Pattern(regexp = "(?=.*[A-Z]).+",
             message = "Login must contain at least one large letter",
             groups = { Operation.OnCreate.class })
+    @NotNull
+    @Length(min = 3)
     private String login;
+
     @Pattern(regexp = "(?=.*[A-Z]).+",
             message = "Password must contain at least one large letter",
             groups = { Operation.OnCreate.class })
+    @NotNull
+    @Length(min = 3)
     private String password;
 }
