@@ -23,6 +23,24 @@
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
     </properties>
 
+    <profiles>
+        <profile>
+            <id>test</id>
+            <properties>
+                <liquibase.config>src/main/resources/liquibase_test.properties</liquibase.config>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>production</id>
+            <properties>
+                <liquibase.config>src/main/resources/liquibase.properties</liquibase.config>
+            </properties>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
